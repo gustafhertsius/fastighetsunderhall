@@ -127,7 +127,19 @@ if not st.session_state.pdf_reports.empty:
             with open(file_path, "rb") as f:
                 st.download_button("⬇️ Ladda ner PDF", f, file_name=row['Filnamn'])
 
-# --- VISA SPARADE EXTRAHERADE TABELLER ---
+# --- LÄS IN DATA FRÅN EXCEL I STÄLLET FÖR PDF ---
+st.subheader("📥 Ladda upp objektrapport från Excel (ersätter PDF-tabeller)")
+xls_file = st.file_uploader("Välj Excel-fil (XLSX)", type=["xlsx"], key="xls_upload")
+
+if xls_file:
+    df_xls = pd.read_excel(xls_file)
+    st.success("Excel-data inläst!")
+    st.dataframe(df_xls)
+
+    if st.button("💾 Spara Excel-tabell som data"):
+        st.session_state.extracted_tables = df_xls
+        st.success("Excel-tabellen är nu sparad som objektrapport.")
+
 if "extracted_tables" in st.session_state and not st.session_state.extracted_tables.empty:
     st.subheader("📋 Sparade tabeller från objektrapporter")
 
