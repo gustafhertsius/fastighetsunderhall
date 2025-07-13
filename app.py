@@ -212,8 +212,9 @@ with st.form("add_common_maintenance"):
     if ca_submit:
         image_path = ""
         if ca_image:
-            os.makedirs("common_area_images", exist_ok=True)
-            image_path = os.path.join("common_area_images", ca_image.name)
+            image_dir = os.path.join("common_area_images", ca_property.replace(" ", "_"))
+            os.makedirs(image_dir, exist_ok=True)
+            image_path = os.path.join(image_dir, ca_image.name)
             with open(image_path, "wb") as f:
                 f.write(ca_image.getbuffer())
 
@@ -293,7 +294,7 @@ else:
     if save_room:
         image_filename = ""
         if rm_image:
-            image_dir = "room_maintenance_images"
+            image_dir = os.path.join("room_maintenance_images", rm_prop.replace(" ", "_"))
             os.makedirs(image_dir, exist_ok=True)
             image_filename = os.path.join(image_dir, rm_image.name)
             with open(image_filename, "wb") as f:
@@ -313,7 +314,7 @@ else:
             st.session_state.room_maintenance,
             pd.DataFrame([new_rm])
         ], ignore_index=True)
-        st.success(f"Underhållspunkt sparad för {room} ({part}) i {rm_apt}, {rm_prop}.") i {rm_apt}, {rm_prop}.")
+        st.success(f"Underhållspunkt sparad för {room} ({part}) i {rm_apt}, {rm_prop}.")")
 
 if not st.session_state.room_maintenance.empty:
     st.subheader("📋 Alla underhållspunkter i rum")
