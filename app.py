@@ -57,4 +57,4 @@ if uploaded_files:
 
 # --- PÅMINNELSER OM ÄLDRE INSTALLATIONER ---
 st.subheader("🔔 Installationer äldre än 10 år")
-ten_years_ago = date.today() - ti
+ten_years_ago = date.today() - timedelta(days=365 * 10)
