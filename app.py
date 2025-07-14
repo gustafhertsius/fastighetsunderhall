@@ -40,9 +40,16 @@ with st.form("install_form"):
     prop = st.selectbox("Fastighet", fastigheter, key="prop")
     install_type = st.selectbox("Typ av installation", ["Kylskåp", "Frys", "Spis", "Diskmaskin", "Tvättmaskin", "Torktumlare"], key="install_type")
     install_date = st.date_input("Installationsdatum", value=date.today(), key="install_date")
-        if "objektdata" in st.session_state and prop:
-        lägenheter = sorted(st.session_state["objektdata"][st.session_state["objektdata"]["Fastighet"] == prop]["Objekt"].dropna().unique())
-        apt_number = st.selectbox("Lägenhetsnummer", lägenheter, key="apt")
+    if "objektdata" in st.session_state and prop:
+        objekt_df = st.session_state["objektdata"]
+        objekt_df = objekt_df[objekt_df["Fastighet"] == prop]
+        anv_val = st.selectbox("Filtrera på användning", ["Alla"] + sorted(objekt_df["Användning"].dropna().unique()), key="usefilter")
+        if anv_val != "Alla":
+            objekt_df = objekt_df[objekt_df["Användning"] == anv_val]
+        valbara_objekt = objekt_df["Objekt"].dropna().unique()
+        apt_number = st.selectbox("Välj objekt (lägenhet eller lokal)", sorted(valbara_objekt), key="apt")
+    else:
+        apt_number = st.text_input("Lägenhetsnummer", key="apt")
     else:
         apt_number = st.text_input("Lägenhetsnummer", key="apt")
     model = st.text_input("Märke/modell", key="model")
