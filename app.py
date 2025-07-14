@@ -33,10 +33,18 @@ st.title("🏠 Fastighetsunderhåll – Översikt")
 # --- LÄGG TILL INSTALLATION ---
 st.subheader("➕ Lägg till installation")
 with st.form("install_form"):
-    prop = st.selectbox("Fastighet", ["Essingeslätten 5", "Estland – Vandrarhem", "Exempelgatan 1", "Klarabergsgatan 3", "Södervägen 12"], key="prop")
+    if "objektdata" in st.session_state:
+        fastigheter = sorted(st.session_state["objektdata"]["Fastighet"].dropna().unique())
+    else:
+        fastigheter = ["Essingeslätten 5", "Estland – Vandrarhem", "Exempelgatan 1", "Klarabergsgatan 3", "Södervägen 12"]
+    prop = st.selectbox("Fastighet", fastigheter, key="prop")
     install_type = st.selectbox("Typ av installation", ["Kylskåp", "Frys", "Spis", "Diskmaskin", "Tvättmaskin", "Torktumlare"], key="install_type")
     install_date = st.date_input("Installationsdatum", value=date.today(), key="install_date")
-    apt_number = st.text_input("Lägenhetsnummer", key="apt")
+        if "objektdata" in st.session_state and prop:
+        lägenheter = sorted(st.session_state["objektdata"][st.session_state["objektdata"]["Fastighet"] == prop]["Objekt"].dropna().unique())
+        apt_number = st.selectbox("Lägenhetsnummer", lägenheter, key="apt")
+    else:
+        apt_number = st.text_input("Lägenhetsnummer", key="apt")
     model = st.text_input("Märke/modell", key="model")
     comment = st.text_input("Kommentar", key="comment")
     submitted = st.form_submit_button("Spara installation")
@@ -53,7 +61,7 @@ if uploaded_files:
 # --- GEMENSAMMA UTRYMMEN ---
 st.subheader("🏢 Underhåll i gemensamma utrymmen")
 with st.form("common_area_form"):
-    ca_property = st.selectbox("Fastighet", ["Essingeslätten 5", "Estland – Vandrarhem", "Exempelgatan 1", "Klarabergsgatan 3", "Södervägen 12"], key="ca_property")
+        ca_property = st.selectbox("Fastighet", fastigheter, key="ca_property")
     ca_area = st.selectbox("Utrymme", ["Tvättstuga", "Källarförråd", "Vindsförråd", "Pannrum", "Garage", "Trapphus", "Cykelrum", "Fasader", "Fönster", "Balkonger", "Tak", "Övrigt"], key="ca_area")
     ca_part = st.selectbox("Del i utrymmet", ["Golv", "Väggar", "Tak", "Belysning", "Ventilation", "Inredning", "Eget val"], key="ca_part")
     ca_custom = st.text_input("Egen punkt (om du valde 'Eget val')", key="ca_custom")
@@ -127,6 +135,27 @@ if ca_submit:
         df_ca.to_excel(ca_path, index=False)
         with open(ca_path, "rb") as f:
             st.download_button("Ladda ner Excel", f, file_name=os.path.basename(ca_path))
+
+# --- LADDA OCH VISA OBJEKTFIL ---
+st.subheader("📊 Objektförteckning (från Excel)")
+objektfil_path = "./Objektförteckning - Enterprise.xlsx"
+if os.path.exists(objektfil_path):
+    objekt_df = pd.read_excel(objektfil_path)
+    st.session_state["objektdata"] = objekt_df
+    fastigheter = sorted(objekt_df["Fastighet"].dropna().unique())
+    vald_fastighet = st.selectbox("Filtrera på fastighet", ["Alla"] + fastigheter)
+    if vald_fastighet != "Alla":
+        filtrerad_df = objekt_df[objekt_df["Fastighet"] == vald_fastighet]
+    else:
+        filtrerad_df = objekt_df
+    st.dataframe(filtrerad_df)
+    if st.button("⬇️ Exportera objektförteckning"):
+        export_path = f"exports/objekt_{vald_fastighet.replace(' ', '_')}_{date.today()}.xlsx"
+        filtrerad_df.to_excel(export_path, index=False)
+        with open(export_path, "rb") as f:
+            st.download_button("Ladda ner Excel", f, file_name=os.path.basename(export_path))
+else:
+    st.warning("Ingen objektfil hittades. Kontrollera att den heter 'Objektförteckning - Enterprise.xlsx' och ligger i projektmappen.")
 
 # --- KOMMANDE FUNKTIONER ---
 st.subheader("🔧 Kommande funktioner")
