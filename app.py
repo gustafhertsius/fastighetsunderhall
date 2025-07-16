@@ -120,10 +120,6 @@ if not upcoming.empty:
     st.dataframe(upcoming)
 st.markdown("---")
 
-    st.warning("⚠️ Kommande underhåll inom 6 månader:")
-    st.dataframe(upcoming)
-st.markdown("---")
-
 # --- EXPORTKNAPP ---
 if st.button("⬇️ Exportera återkommande underhåll"):
     file_path = os.path.join("exports", f"aterkommande_underhall_{date.today()}.xlsx")
