@@ -26,6 +26,12 @@ import pandas as pd
 from datetime import date, timedelta
 import os
 
+# --- LADDA IN OBJEKTFÖRTECKNING TIDIGT ---
+objektfil_path = "./Objektförteckning - Enterprise.xlsx"
+if os.path.exists(objektfil_path):
+    objekt_df = pd.read_excel(objektfil_path)
+    st.session_state["objektdata"] = objekt_df
+
 # --- SIDHUVD ---
 st.set_page_config(page_title="Fastighetsunderhåll", layout="wide")
 st.title("🏠 Fastighetsunderhåll – Översikt")
@@ -113,15 +119,7 @@ if not upcoming.empty:
     st.warning("⚠️ Kommande underhåll inom 6 månader:")
     st.dataframe(upcoming)
 st.markdown("---")
-st.subheader("🔁 Återkommande underhåll")
-rec_tasks = pd.DataFrame([
-    {"Fastighet": "Essingeslätten 5", "Beskrivning": "OVK", "Senast utfört": "2022-05-10", "Frekvens": 3, "Prioritet": "Hög", "Ansvarig": "Förvaltare"},
-    {"Fastighet": "Estland – Vandrarhem", "Beskrivning": "Rensning av ventilationskanaler", "Senast utfört": "2024-01-01", "Frekvens": 2, "Prioritet": "Mellan", "Ansvarig": "Driftchef"},
-])
-rec_tasks["Senast utfört"] = pd.to_datetime(rec_tasks["Senast utfört"])
-rec_tasks["Nästa planerade"] = rec_tasks["Senast utfört"] + pd.to_timedelta(rec_tasks["Frekvens"] * 365, unit="D")
-upcoming = rec_tasks[rec_tasks["Nästa planerade"] <= pd.Timestamp.today() + pd.to_timedelta(180, unit="D")]
-if not upcoming.empty:
+
     st.warning("⚠️ Kommande underhåll inom 6 månader:")
     st.dataframe(upcoming)
 st.markdown("---")
@@ -172,28 +170,7 @@ if ca_submit:
         with open(ca_path, "rb") as f:
             st.download_button("Ladda ner Excel", f, file_name=os.path.basename(ca_path))
 
-# --- LADDA OCH VISA OBJEKTFIL ---
-st.subheader("📊 Objektförteckning (från Excel)")
-objektfil_path = "./Objektförteckning - Enterprise.xlsx"
-if os.path.exists(objektfil_path):
-    objekt_df = pd.read_excel(objektfil_path)
-    st.session_state["objektdata"] = objekt_df
-    fastigheter = sorted(objekt_df["Fastighet"].dropna().unique())
-    vald_fastighet = st.selectbox("Filtrera på fastighet", ["Alla"] + fastigheter)
-    if vald_fastighet != "Alla":
-        filtrerad_df = objekt_df[objekt_df["Fastighet"] == vald_fastighet]
-    else:
-        filtrerad_df = objekt_df
-    st.dataframe(filtrerad_df)
-    if st.button("⬇️ Exportera objektförteckning"):
-        export_path = f"exports/objekt_{vald_fastighet.replace(' ', '_')}_{date.today()}.xlsx"
-        filtrerad_df.to_excel(export_path, index=False)
-        with open(export_path, "rb") as f:
-            st.download_button("Ladda ner Excel", f, file_name=os.path.basename(export_path))
-else:
-    st.warning("Ingen objektfil hittades. Kontrollera att den heter 'Objektförteckning - Enterprise.xlsx' och ligger i projektmappen.")
 
-# --- KOMMANDE FUNKTIONER ---
 st.subheader("🔧 Kommande funktioner")
 st.subheader("🔧 Kommande funktioner")
 st.markdown("- Visning av installationer")
