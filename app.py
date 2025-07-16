@@ -28,9 +28,11 @@ import os
 
 # --- LADDA IN OBJEKTFÖRTECKNING TIDIGT ---
 objektfil_path = "./Objektförteckning - Enterprise.xlsx"
+fastigheter = []
 if os.path.exists(objektfil_path):
     objekt_df = pd.read_excel(objektfil_path)
     st.session_state["objektdata"] = objekt_df
+    fastigheter = sorted(objekt_df["Fastighet"].dropna().unique())
 
 # --- SIDHUVD ---
 st.set_page_config(page_title="Fastighetsunderhåll", layout="wide")
