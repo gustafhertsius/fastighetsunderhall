@@ -50,8 +50,6 @@ with st.form("install_form"):
         apt_number = st.selectbox("Välj objekt (lägenhet eller lokal)", sorted(valbara_objekt), key="apt")
     else:
         apt_number = st.text_input("Lägenhetsnummer", key="apt")
-    else:
-        apt_number = st.text_input("Lägenhetsnummer", key="apt")
     model = st.text_input("Märke/modell", key="model")
     comment = st.text_input("Kommentar", key="comment")
     submitted = st.form_submit_button("Spara installation")
