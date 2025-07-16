@@ -22,7 +22,7 @@ for filename in os.listdir(EXPORT_DIR):
 # Resten av din befintliga kod nedan (oförändrad)
 
 import streamlit as st
-import pandja rensa as as pd
+import pandas as pd
 from datetime import date, timedelta
 import os
 
@@ -173,8 +173,6 @@ if ca_submit:
             st.download_button("Ladda ner Excel", f, file_name=os.path.basename(ca_path))
 
 
-st.subheader("🔧 Kommande funktioner")
-st.subheader("🔧 Kommande funktioner")
 st.markdown("- Visning av installationer")
 st.markdown("- Påminnelser om kommande underhåll")
 st.markdown("- Export av underhållsdata")
