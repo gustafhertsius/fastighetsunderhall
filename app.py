@@ -66,7 +66,7 @@ if uploaded_files:
 # --- GEMENSAMMA UTRYMMEN ---
 st.subheader("🏢 Underhåll i gemensamma utrymmen")
 with st.form("common_area_form"):
-        ca_property = st.selectbox("Fastighet", fastigheter, key="ca_property")
+    ca_property = st.selectbox("Fastighet", fastigheter, key="ca_property")
     ca_area = st.selectbox("Utrymme", ["Tvättstuga", "Källarförråd", "Vindsförråd", "Pannrum", "Garage", "Trapphus", "Cykelrum", "Fasader", "Fönster", "Balkonger", "Tak", "Övrigt"], key="ca_area")
     ca_part = st.selectbox("Del i utrymmet", ["Golv", "Väggar", "Tak", "Belysning", "Ventilation", "Inredning", "Eget val"], key="ca_part")
     ca_custom = st.text_input("Egen punkt (om du valde 'Eget val')", key="ca_custom")
@@ -81,7 +81,38 @@ with st.form("common_area_form"):
     if ca_submit:
         st.success(f"Underhållspunkt sparad för {ca_area} ({ca_custom or ca_part}) i {ca_property}.")
 
-# --- ÅTERKOMMANDE UNDERHÅLL ---
+# --- ÅTERKOMMANDE UNDERHÅLL (MED REDIGERING) ---
+st.subheader("🔁 Återkommande underhåll")
+if "recurring_tasks" not in st.session_state:
+    st.session_state["recurring_tasks"] = pd.DataFrame([
+        {"Fastighet": "Essingeslätten 5", "Beskrivning": "OVK", "Senast utfört": "2022-05-10", "Frekvens": 3, "Prioritet": "Hög", "Ansvarig": "Förvaltare"},
+        {"Fastighet": "Estland – Vandrarhem", "Beskrivning": "Rensning av ventilationskanaler", "Senast utfört": "2024-01-01", "Frekvens": 2, "Prioritet": "Mellan", "Ansvarig": "Driftchef"},
+    ])
+
+with st.form("add_recurring"):
+    col1, col2 = st.columns(2)
+    with col1:
+        r_prop = st.selectbox("Fastighet", fastigheter, key="r_prop")
+        r_task = st.text_input("Beskrivning", key="r_task")
+    with col2:
+        r_date = st.date_input("Senast utfört", key="r_date")
+        r_freq = st.number_input("Frekvens (år)", min_value=1, max_value=20, value=1, step=1, key="r_freq")
+    r_priority = st.selectbox("Prioritet", ["Hög", "Mellan", "Låg"], key="r_priority")
+    r_responsible = st.text_input("Ansvarig", key="r_responsible")
+    r_submit = st.form_submit_button("➕ Lägg till uppgift")
+    if r_submit:
+        new_row = pd.DataFrame.from_records([{"Fastighet": r_prop, "Beskrivning": r_task, "Senast utfört": r_date, "Frekvens": r_freq, "Prioritet": r_priority, "Ansvarig": r_responsible}])
+        st.session_state["recurring_tasks"] = pd.concat([st.session_state["recurring_tasks"], new_row], ignore_index=True)
+        st.success("Uppgiften har lagts till.")
+
+rec_tasks = st.session_state["recurring_tasks"].copy()
+rec_tasks["Senast utfört"] = pd.to_datetime(rec_tasks["Senast utfört"])
+rec_tasks["Nästa planerade"] = rec_tasks["Senast utfört"] + pd.to_timedelta(rec_tasks["Frekvens"] * 365, unit="D")
+upcoming = rec_tasks[rec_tasks["Nästa planerade"] <= pd.Timestamp.today() + pd.to_timedelta(180, unit="D")]
+if not upcoming.empty:
+    st.warning("⚠️ Kommande underhåll inom 6 månader:")
+    st.dataframe(upcoming)
+st.markdown("---")
 st.subheader("🔁 Återkommande underhåll")
 rec_tasks = pd.DataFrame([
     {"Fastighet": "Essingeslätten 5", "Beskrivning": "OVK", "Senast utfört": "2022-05-10", "Frekvens": 3, "Prioritet": "Hög", "Ansvarig": "Förvaltare"},
