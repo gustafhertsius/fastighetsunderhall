@@ -22,7 +22,7 @@ for filename in os.listdir(EXPORT_DIR):
 # Resten av din befintliga kod nedan (oförändrad)
 
 import streamlit as st
-import pandas as pd
+import pandja rensa as as pd
 from datetime import date, timedelta
 import os
 
@@ -42,7 +42,7 @@ with st.form("install_form"):
     if "objektdata" in st.session_state:
         fastigheter = sorted(st.session_state["objektdata"]["Fastighet"].dropna().unique())
     else:
-        fastigheter = ["Essingeslätten 5", "Estland – Vandrarhem", "Exempelgatan 1", "Klarabergsgatan 3", "Södervägen 12"]
+        fastigheter = []  # ersatt med riktig lista om Exceldata finns
     prop = st.selectbox("Fastighet", fastigheter, key="prop")
     install_type = st.selectbox("Typ av installation", ["Kylskåp", "Frys", "Spis", "Diskmaskin", "Tvättmaskin", "Torktumlare"], key="install_type")
     install_date = st.date_input("Installationsdatum", value=date.today(), key="install_date")
@@ -73,7 +73,13 @@ if uploaded_files:
 st.subheader("🏢 Underhåll i gemensamma utrymmen")
 with st.form("common_area_form"):
     ca_property = st.selectbox("Fastighet", fastigheter, key="ca_property")
-    ca_area = st.selectbox("Utrymme", ["Tvättstuga", "Källarförråd", "Vindsförråd", "Pannrum", "Garage", "Trapphus", "Cykelrum", "Fasader", "Fönster", "Balkonger", "Tak", "Övrigt"], key="ca_area")
+    if "objektdata" in st.session_state:
+        gemensamma = st.session_state["objektdata"]
+        utrymmen = sorted(gemensamma["Objekttyp"].dropna().unique())
+        ca_area_val = st.selectbox("Välj utrymme", utrymmen + ["Eget val"], key="ca_area")
+        ca_area = st.text_input("Eget utrymme (om du valde 'Eget val')", key="ca_area_custom") if ca_area_val == "Eget val" else ca_area_val
+    else:
+        ca_area = st.selectbox("Utrymme", ["Tvättstuga", "Källarförråd", "Vindsförråd", "Pannrum", "Garage", "Trapphus", "Cykelrum", "Fasader", "Fönster", "Balkonger", "Tak", "Övrigt"], key="ca_area")
     ca_part = st.selectbox("Del i utrymmet", ["Golv", "Väggar", "Tak", "Belysning", "Ventilation", "Inredning", "Eget val"], key="ca_part")
     ca_custom = st.text_input("Egen punkt (om du valde 'Eget val')", key="ca_custom")
     ca_status = st.selectbox("Status", ["OK", "Behöver åtgärdas", "Under bevakning"], key="ca_status")
